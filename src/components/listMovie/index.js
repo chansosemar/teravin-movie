@@ -69,7 +69,7 @@ export default ListMovie;
 const styles = StyleSheet.create({
 	flatlist: {
 		marginHorizontal: wp(5),
-		marginBottom: hp(17),
+		marginBottom: hp(8),
 	},
 	render: {
 		marginVertical: wp(2),

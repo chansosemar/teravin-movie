@@ -22,7 +22,8 @@ export default Home;
 
 const styles  = StyleSheet.create({
 	container:{
-		backgroundColor:color.dark
+		backgroundColor:color.dark,
+		height:'100%'
 	},
 	txt:{
 		alignSelf:'center',

@@ -5,11 +5,20 @@ import {wp, fp, hp} from '../../config/responsive';
 
 const {color, font, fontSize} = AppStyle;
 
-const OfflineNotif = () => {
+const OfflineNotif = ({connect}) => {
+	
 	return (
-		<View style={styles.topNotif}>
-			<Text style={styles.textNotif}>No Internet Connection</Text>
-		</View>
+		<>
+			{connect ? (
+				<View style={styles.topNotifConnect}>
+					<Text style={styles.textNotif}>You Are Connected</Text>
+				</View>
+			) : (
+				<View style={styles.topNotif}>
+					<Text style={styles.textNotif}>No Internet Connection</Text>
+				</View>
+			)}
+		</>
 	);
 };
 
@@ -19,13 +28,24 @@ const styles = StyleSheet.create({
 	topNotif: {
 		backgroundColor: color.warning,
 		height: hp(7),
-		width:'100%',
+		width: '100%',
 		alignItems: 'center',
 		justifyContent: 'center',
-		position:'absolute',
-		top:0,
-		alignSelf:'center',
-		zIndex:1
+		position: 'absolute',
+		top: 0,
+		alignSelf: 'center',
+		zIndex: 1,
+	},
+	topNotifConnect: {
+		backgroundColor: color.green,
+		height: hp(7),
+		width: '100%',
+		alignItems: 'center',
+		justifyContent: 'center',
+		position: 'absolute',
+		top: 0,
+		alignSelf: 'center',
+		zIndex: 1,
 	},
 	textNotif: {
 		fontFamily: font.bold,

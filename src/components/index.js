@@ -1,9 +1,9 @@
 import OfflineNotif from './offlineNotif'
 import ListMovie from './listMovie'
-import SplashScreen from './splashScreen'
+import Splash from './splashScreen'
 
 export {
 	OfflineNotif,
 	ListMovie,
-	SplashScreen
+	Splash
 }
