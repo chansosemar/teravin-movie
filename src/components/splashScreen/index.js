@@ -23,7 +23,7 @@ const SplashScreen = () => {
 			},5000);
 		});
 	});
-	console.log(NetInfo);
+
 	return (
 		<View style={styles.container}>
 			{show ? <OfflineNotif connect={connect} /> : null}

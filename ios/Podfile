@@ -10,6 +10,8 @@ target 'teravinMovie' do
 
   pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
 
+  pod 'react-native-netinfo', :path => '../node_modules/@react-native-community/netinfo'
+
   target 'teravinMovieTests' do
     inherit! :complete
     # Pods for testing

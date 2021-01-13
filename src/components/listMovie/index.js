@@ -1,9 +1,20 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+import {
+	Text,
+	View,
+	StyleSheet,
+	FlatList,
+	TouchableOpacity,
+	ActivityIndicator,
+} from 'react-native';
 import axios from 'axios';
+import NotifUpdate from '../notifUpdate';
 import {AppStyle} from '../../config/style';
 import {wp, fp, hp} from '../../config/responsive';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getFilm, saveFilm, getUpdate, saveUpdate} from '../../config/storage';
+import moment from 'moment';
 
 const {color, font, fontSize} = AppStyle;
 
@@ -11,23 +22,62 @@ const ListMovie = () => {
 	const baseUrl =
 		'https://api.themoviedb.org/3/discover/movie?api_key=f7b67d9afdb3c971d4419fa4cb667fbf';
 	const [data, setData] = useState();
+	const [dataUpdate, setDataUpdate] = useState();
+	const [update, setUpdate] = useState(false);
 	const [refresh, setRefresh] = useState(60000 || 0);
 	const navigation = useNavigation();
-	
-	const getMovie = () => {
+
+	async function getFilm() {
+		const movie = await AsyncStorage.getItem('MOVIE');
+		if (movie == null) {
+			getMovie();
+		} else {
+			setData(JSON.parse(movie));
+		}
+	}
+
+	async function getMovie() {
+		const movie = await AsyncStorage.getItem('MOVIE');
 		axios
 			.get(baseUrl)
 			.then((res) => {
-				const listData = res.data.results;
-				setData(listData.slice(0, 10));
-				console.log('refresh');
+				const listData = res.data.results.slice(0, 10);
+				checkMovie(listData);
+				if (movie == null) {
+					saveFilm(listData);
+				}
 			})
 			.catch((err) => {
 				console.log(err);
 			});
+	}
+
+	async function checkMovie(newList) {
+		const movie = await AsyncStorage.getItem('MOVIE');
+		const movie2 = await AsyncStorage.getItem('FILM');
+		const convert = JSON.parse(movie);
+		const res = updateData(newList, convert).length;
+		if (res > 0) {
+			saveUpdate(newList);
+			setDataUpdate(newList || movie2);
+			setUpdate(true);
+			setTimeout(() => {
+				setUpdate(false);
+			}, 10000);
+		}
+	}
+	const updateData = (firstArray, secondArray) => {
+		return firstArray.filter(
+			(firstArrayItem) =>
+				!secondArray.some(
+					(secondArrayItem) =>
+						firstArrayItem.original_title === secondArrayItem.original_title,
+				),
+		);
 	};
+
 	useEffect(() => {
-		getMovie();
+		getFilm();
 	}, [baseUrl]);
 
 	useEffect(() => {
@@ -41,7 +91,9 @@ const ListMovie = () => {
 		<View style={styles.render}>
 			<Text style={styles.title}>{item.original_title}</Text>
 			<View style={styles.detail}>
-				<Text style={styles.date}>{item.release_date}</Text>
+				<Text style={styles.date}>
+					{moment(item.release_date).format('Do MMM YY')}
+				</Text>
 				<TouchableOpacity
 					onPress={() => navigation.navigate('Detail', {item})}
 					style={styles.button}>
@@ -53,13 +105,24 @@ const ListMovie = () => {
 
 	return (
 		<View>
-			<FlatList
-				data={data}
-				renderItem={renderItem}
-				keyExtractor={(item) => item.id.toString()}
-				style={styles.flatlist}
-				showsVerticalScrollIndicator={false}
-			/>
+			{data == null ? (
+				<View style={styles.loadingBar}>
+					<ActivityIndicator size="large" color="#fff" />
+					<Text style={styles.txt}>This is Your First Time ?</Text>
+					<Text style={styles.txt2}>Please Wait about a minute..</Text>
+				</View>
+			) : (
+				<>
+					<FlatList
+						data={data}
+						renderItem={renderItem}
+						keyExtractor={(item) => item.id.toString()}
+						style={styles.flatlist}
+						showsVerticalScrollIndicator={false}
+					/>
+					<NotifUpdate update={update} onPress={() => setData(dataUpdate)} />
+				</>
+			)}
 		</View>
 	);
 };
@@ -105,5 +168,20 @@ const styles = StyleSheet.create({
 		color: color.dark,
 		fontFamily: font.semiBold,
 		fontSize: fontSize.medium,
+	},
+	loadingBar: {
+		position: 'absolute',
+		top: hp(35),
+		alignSelf: 'center',
+		alignItems: 'center',
+	},
+	txt: {
+		color: color.light,
+		marginTop: hp(5),
+		fontFamily: font.semiBold,
+	},
+	txt2: {
+		color: color.light,
+		fontFamily: font.semiBold,
 	},
 });
